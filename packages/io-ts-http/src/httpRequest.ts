@@ -5,7 +5,7 @@ import { flattened, optional, optionalized } from './combinators';
 export const GenericHttpRequest = optionalized({
   // DISCUSS: renaming this to something more specific, e.g. route, or path, or routeParams, or pathParams
   params: t.record(t.string, t.string),
-  query: t.record(t.string, t.union([t.string, t.array(t.string)])),
+  query: t.record(t.string, t.union([t.undefined, t.string, t.array(t.string)])),
   headers: optional(t.record(t.string, t.string)),
   body: optional(Json),
 });
