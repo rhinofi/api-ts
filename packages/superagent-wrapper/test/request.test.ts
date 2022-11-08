@@ -21,7 +21,7 @@ const PostTestRoute = h.httpRoute({
   method: 'POST',
   request: h.httpRequest({
     query: {
-      foo: t.string,
+      foo: h.optional(t.string),
     },
     params: {
       id: NumberFromString,
