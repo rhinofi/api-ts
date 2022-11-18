@@ -21,7 +21,7 @@ const PostTestRoute = h.httpRoute({
   method: 'POST',
   request: h.httpRequest({
     query: {
-      foo: t.string,
+      foo: h.optional(t.string),
     },
     params: {
       id: NumberFromString,
@@ -31,12 +31,16 @@ const PostTestRoute = h.httpRoute({
     },
   }),
   response: {
-    200: t.type({
-      id: t.number,
-      foo: t.string,
-      bar: t.number,
-      baz: t.boolean,
-    }),
+    200: t.intersection([
+      t.type({
+        id: t.number,
+        bar: t.number,
+        baz: t.boolean,
+      }),
+      t.partial({
+        foo: t.string,
+      }),
+    ]),
     401: t.type({
       message: t.string,
     }),
