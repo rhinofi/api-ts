@@ -1,6 +1,6 @@
 {
-  "name": "@api-ts/superagent-wrapper",
-  "version": "0.0.0-semantically-released",
+  "name": "@rhinofi/api-ts-superagent-wrapper",
+  "version": "1.1.3",
   "description": "Make type-safe HTTP requests with superagent",
   "author": "Patrick McLaughlin <patrickmclaughlin@bitgo.com>",
   "license": "Apache-2.0",
@@ -17,7 +17,7 @@
     "test": "c8 --all mocha test/**/*.test.ts --require ts-node/register --exit"
   },
   "dependencies": {
-    "@api-ts/io-ts-http": "0.0.0-semantically-released",
+    "@api-ts/io-ts-http": "2.0.0",
     "fp-ts": "2.13.1",
     "io-ts": "2.1.3",
     "whatwg-url": "11.0.0"
@@ -41,6 +41,11 @@
     "typescript": "4.7.4"
   },
   "publishConfig": {
-    "access": "public"
+    "registry": "https://npm.pkg.github.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rhinofi/api-ts.git",
+    "directory": "packages/superagent-wrapper"
   }
 }
