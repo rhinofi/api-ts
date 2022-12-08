@@ -34,15 +34,19 @@ export class DecodeError extends Error {
 
 const decodedResponse = <Route extends h.HttpRoute>(res: DecodedResponse<Route>) => res;
 
+type DecodeOptions = {
+  useText?: boolean;
+};
 type ExpectedDecodedResponse<
   Route extends h.HttpRoute,
   StatusCode extends keyof Route['response'],
 > = DecodedResponse<Route> & { status: StatusCode };
 
 type PatchedRequest<Req, Route extends h.HttpRoute> = Req & {
-  decode: () => Promise<DecodedResponse<Route>>;
+  decode: (options?: DecodeOptions) => Promise<DecodedResponse<Route>>;
   decodeExpecting: <StatusCode extends keyof Route['response']>(
     status: StatusCode,
+    options?: DecodeOptions,
   ) => Promise<ExpectedDecodedResponse<Route, StatusCode>>;
 };
 
@@ -52,6 +56,7 @@ type SuperagentLike<Req> = {
 
 type Response = {
   body: unknown;
+  text: unknown;
   status: number;
 };
 
@@ -122,21 +127,22 @@ const patchRequest = <
 ): PatchedRequest<Req, Route> => {
   const patchedReq = req as PatchedRequest<Req, Route>;
 
-  patchedReq.decode = () =>
+  patchedReq.decode = (options?: DecodeOptions) =>
     req.then((res) => {
-      const { body, status } = res;
+      const { body, text, status } = res;
+      const bodyOrText = options?.useText ? text : body;
 
       if (!hasCodecForStatus(route.response, status)) {
         return decodedResponse({
           // DISCUSS: what's this non-standard HTTP status code?
           status: 'decodeError',
           error: `No codec for status ${status}`,
-          body,
+          body: bodyOrText,
           original: res,
         });
       }
       return pipe(
-        route.response[status].decode(res.body),
+        route.response[status].decode(bodyOrText),
         E.map((body) =>
           decodedResponse<Route>({
             status,
@@ -149,7 +155,7 @@ const patchRequest = <
           decodedResponse<Route>({
             status: 'decodeError',
             error: PathReporter.failure(error).join('\n'),
-            body: res.body,
+            body: bodyOrText,
             original: res,
           }),
         ),
@@ -158,8 +164,9 @@ const patchRequest = <
 
   patchedReq.decodeExpecting = <StatusCode extends keyof Route['response']>(
     status: StatusCode,
+    options?: DecodeOptions,
   ) =>
-    patchedReq.decode().then((res) => {
+    patchedReq.decode(options).then((res) => {
       if (res.original.status !== status) {
         const error = `Unexpected response ${res.original.status}: ${stringify(
           res.original.body,
